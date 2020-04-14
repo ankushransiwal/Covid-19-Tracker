@@ -3,6 +3,7 @@ from time import sleep
 import re
 from datetime import datetime
 import smtplib
+from email.message import EmailMessage
 
 class Coronavirus():
     def __init__(self):
@@ -46,16 +47,14 @@ class Coronavirus():
         self.driver.quit()
 
 def send_mail(country_element, total_cases, new_cases, total_deaths, new_deaths, active_cases, total_recovered, serious_critical):
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    
     server.login('ankushransiwal.13@gmail.com', 'dibzvlfqwxouxraa')
-
-    subject = 'Coronavirus stats in your country today!'
-
-    body = 'Today in ' + country_element + '\
+    msg = EmailMessage()
+    msg['Subject'] = 'Coronavirus stats in your country today!'
+    msg['From'] = 'ankushransiwal.13@gmail.com'
+    msg['To'] = 'ankushransiwal.13@gmail.com'
+    msg.set_content('Today in ' + country_element + '\
         \nThere is new data on coronavirus:\
         \nTotal cases: ' + total_cases +'\
         \nNew cases: ' + new_cases + '\
@@ -64,15 +63,29 @@ def send_mail(country_element, total_cases, new_cases, total_deaths, new_deaths,
         \nActive cases: ' + active_cases + '\
         \nTotal recovered: ' + total_recovered + '\
         \nSerious, critical cases: ' + serious_critical  + '\
-        \nCheck the link: https://www.worldometers.info/coronavirus/'
-
-    msg = f"Subject: {subject}\n\n{body}"
-
-    server.sendmail(
-        'Coronavirus',
-        'ankushransiwal.13@gmail.com',
-        msg
-    )
+        \nCheck the link: https://www.worldometers.info/coronavirus/')
+    
+    html = """\
+        <!DOCTYPE html>
+        <html> 
+        <body> 
+        <p>Hi,
+        <br> Today in  {country_element} \
+        \nThere is new data on coronavirus:\
+        \nTotal cases: {total_cases} \
+        \nNew cases: {new_cases} \
+        \nTotal deaths: {total_deaths} \
+        \nNew deaths: ' + new_deaths + '\
+        \nActive cases: ' + active_cases + '\
+        \nTotal recovered: ' + total_recovered + '\
+        \nSerious, critical cases: ' + serious_critical  + '\
+        \nCheck the link: https://www.worldometers.info/coronavirus/</p> 
+        <p><a href="https://blog.mailtrap.io/2018/09/27/cloud-or-local-smtp-server">SMTP Server for Testing: Cloud-based or Local?</a></p> <p> Feel free to <strong>let us</strong> know what content would be useful for you!</p> </body> </html>
+        """.format(**locals())
+    
+    msg.add_alternative(html, subtype='html')
+    
+    server.send_message(msg)
     print('Hey Email has been sent!')
 
     server.quit()
