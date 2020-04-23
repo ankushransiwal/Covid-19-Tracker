@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 import smtplib
 from email.message import EmailMessage
+from datetime import datetime, timedelta
+from threading import Timer
 
 class Coronavirus():
     def __init__(self):
@@ -151,5 +153,13 @@ def send_mail(India_element, total_cases_Ind, new_cases_Ind, total_deaths_Ind, n
 
     server.quit()
     
+
+x=datetime.today()
+y = x.replace(day=x.day, hour=1, minute=0, second=0, microsecond=0) + timedelta(days=1)
+delta_t=y-x
+
+secs=delta_t.total_seconds()
+t = Timer(secs, Coronavirus.get_data)
+t.start()
 bot = Coronavirus()
 bot.get_data()
